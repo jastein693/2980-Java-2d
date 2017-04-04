@@ -16,10 +16,11 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 public class Draw extends JPanel implements MouseListener, MouseMotionListener, ActionListener{
-	private List<List<Point>> frames = new ArrayList<List<Point>>();
-	private List<Point> lines = new ArrayList<Point>();
+	private List<List<ColorVector>> frames = new ArrayList<List<ColorVector>>();
+	private List<ColorVector> lines = new ArrayList<ColorVector>();
 	private JButton open;
 	private int currentFrame = 0;
+        private Color color= Color.black;
 	Point lastMouseLocation = null;
 	
 	public Draw() {
@@ -38,16 +39,33 @@ public class Draw extends JPanel implements MouseListener, MouseMotionListener, 
 		
 		JButton left = new JButton ("<");
 		left.addActionListener(this);
+                
+                JButton red = new JButton ("red");
+		red.addActionListener(this);
+                
+                JButton blue = new JButton ("blue");
+		blue.addActionListener(this);
+                
+                JButton green = new JButton ("green");
+		green.addActionListener(this);
+                
+                JButton black = new JButton ("black");
+		black.addActionListener(this);
 		
 		JPanel menu = new JPanel();
 		menu.add(open);
 		menu.add(newFrame);
 		menu.add(left);
 		menu.add(right);
+                menu.add(red);
+                menu.add(blue);
+                menu.add(green);
+                menu.add(black);
+                
 		
 		this.add(menu);
 		this.addMouseListener(this);
-        this.addMouseMotionListener(this);
+                this.addMouseMotionListener(this);
         
         frames.add(lines);
 	}
@@ -55,10 +73,13 @@ public class Draw extends JPanel implements MouseListener, MouseMotionListener, 
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		if(e.getPoint().x > 100 && e.getPoint().x < 1800 && e.getPoint().y > 50 && e.getPoint().y < 950) {
-			frames.get(currentFrame).add(lastMouseLocation);
+			frames.get(currentFrame).add(new ColorVector(lastMouseLocation, color));
 			lastMouseLocation = e.getPoint();
 			repaint();
-		}
+		}else{
+                    //frames.get(currentFrame).add(null);
+                    //lastMouseLocation = null;
+                }
 	}
 	
 	public void actionPerformed(ActionEvent e) {
@@ -66,7 +87,7 @@ public class Draw extends JPanel implements MouseListener, MouseMotionListener, 
 			
 		}
 		if(e.getActionCommand() == "New Frame") {
-			frames.add(currentFrame + 1, new ArrayList<Point>());
+			frames.add(currentFrame + 1, new ArrayList<ColorVector>());
 			currentFrame += 1;
 			repaint();
 		}
@@ -78,6 +99,18 @@ public class Draw extends JPanel implements MouseListener, MouseMotionListener, 
 			currentFrame += 1;
 			repaint();
 		}
+                if(e.getActionCommand() == "red") {
+                    color = Color.red;
+                }
+                if(e.getActionCommand() == "blue") {
+                    color = Color.blue;
+                }
+                if(e.getActionCommand() == "green") {
+                    color = Color.green;
+                }
+                if(e.getActionCommand() == "black") {
+                    color = Color.black;
+                }
 	}
 
 	@Override
@@ -126,10 +159,11 @@ public class Draw extends JPanel implements MouseListener, MouseMotionListener, 
 		g.fillRect(200, 150, 1500, 700);
 		g.setColor(Color.black);
 		g.drawRect(100, 50, 1700, 900);
-		System.out.println(frames.get(currentFrame).size());
+            
+		//System.out.println(frames.get(currentFrame).size());
 		for( int i = 0; i < frames.get(currentFrame).size() - 1; ++i ) {
-	          Point p1 = (Point) frames.get(currentFrame).get( i );
-	          Point p2 = (Point) frames.get(currentFrame).get( i + 1 );
+	          ColorVector p1 = (ColorVector) frames.get(currentFrame).get( i );
+	          ColorVector p2 = (ColorVector) frames.get(currentFrame).get( i + 1 );
 	          
 	          // Adding a null into the list is used
 	          // for breaking up the lines when
@@ -137,7 +171,8 @@ public class Draw extends JPanel implements MouseListener, MouseMotionListener, 
 	          // that are not connected
 	          if( !(p1 == null || p2 == null)) {
 	        	 //g.setColor( p2.getColor());
-	             g.drawLine( p1.x, p1.y, p2.x, p2.y );  
+                         g.setColor(p1.color);
+	             g.drawLine( p1.point.x, p1.point.y, p2.point.x, p2.point.y );  
 	          }
 		 }
 	}
