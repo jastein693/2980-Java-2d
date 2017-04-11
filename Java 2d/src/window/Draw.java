@@ -19,15 +19,16 @@ import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class Draw extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener, ActionListener{
 	private List<List<ColorVector>> frames = new ArrayList<List<ColorVector>>();
 	private List<ColorVector> lines = new ArrayList<ColorVector>();
-	private JButton open;
 	private int currentFrame = 0;
     private Color color= Color.black;
 	Point lastMouseLocation = null;
+	Point lastMouseLocationCamera = null;
 	float cameraX = 0;
     float cameraY = 0;
     int mode = 0;
@@ -35,59 +36,11 @@ public class Draw extends JPanel implements MouseListener, MouseMotionListener, 
     float cameraZoom = 1;
 	
 	public Draw() {
-		this.setLayout(new BorderLayout());
-		this.setPreferredSize(new Dimension(400, 400));
-		this.setSize(new Dimension(400, 400));
+		//this.setLayout(new BorderLayout());
+		//this.setPreferredSize(new Dimension(400, 400));
+		//this.setSize(new Dimension(400, 400));
 		
-		open = new JButton("Open");
-		open.setHorizontalTextPosition(JButton.LEFT);
-		open.addActionListener(this);
 		
-		JButton newFrame = new JButton("New Frame");
-		newFrame.addActionListener(this);
-		
-		JButton right = new JButton (">");
-		right.addActionListener(this);
-		
-		JButton left = new JButton ("<");
-		left.addActionListener(this);
-                
-        JButton red = new JButton ("red");
-		red.addActionListener(this);
-                
-        JButton blue = new JButton ("blue");
-		blue.addActionListener(this);
-                
-        JButton green = new JButton ("green");
-		green.addActionListener(this);
-                
-        JButton black = new JButton ("black");
-		black.addActionListener(this);
-		
-		JButton paint = new JButton ("Paint");
-		paint.addActionListener(this);
-		
-		JButton camera = new JButton ("Camera");
-		camera.addActionListener(this);
-		
-		JPanel menu = new JPanel();
-		JPanel sidemenu = new JPanel();
-		sidemenu.setLayout(new BoxLayout(sidemenu, BoxLayout.Y_AXIS));
-		
-		menu.add(open);
-		menu.add(newFrame);
-		menu.add(left);
-		menu.add(right);
-		
-        sidemenu.add(red);
-        sidemenu.add(blue);
-        sidemenu.add(green);
-        sidemenu.add(black);
-        sidemenu.add(paint);
-        sidemenu.add(camera);
-		
-		this.add(menu, BorderLayout.PAGE_START);
-		this.add(sidemenu, BorderLayout.LINE_START);
 		this.addMouseListener(this);
         this.addMouseMotionListener(this);
         this.addMouseWheelListener(this);
@@ -97,29 +50,34 @@ public class Draw extends JPanel implements MouseListener, MouseMotionListener, 
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		if(e.getPoint().x > 100 && e.getPoint().x < 1800 && e.getPoint().y > 50 && e.getPoint().y < 950 && mode == 0) {
+		if(mode == 0) {
 			frames.get(currentFrame).add(new ColorVector(lastMouseLocation, color));
-			lastMouseLocation = new Point((int) ((e.getPoint().x - (this.getWidth()/2))/cameraZoom) , (int) ((e.getPoint().y - (this.getHeight()/2)) / cameraZoom));
+			lastMouseLocation = new Point((int) ((e.getPoint().x - (this.getWidth()/2))/cameraZoom - cameraX), (int) ((e.getPoint().y - (this.getHeight()/2)) / cameraZoom - cameraY));
 			repaint();
 		}
 		
-		if(e.getPoint().x > 100 && e.getPoint().x < 1800 && e.getPoint().y > 50 && e.getPoint().y < 950 && mode == 1) {
-			int diffX = lastMouseLocation.x - (e.getPoint().x - (this.getWidth()/2));
-	        int diffY = lastMouseLocation.y - (e.getPoint().y - (this.getHeight()/2));
+		if( mode == 1) {
+			int diffX = lastMouseLocationCamera.x - (e.getPoint().x - (this.getWidth()/2));
+	        int diffY = lastMouseLocationCamera.y - (e.getPoint().y - (this.getHeight()/2));
 	        
 	        
 	        cameraX -= diffX / cameraZoom;
 	        cameraY -= diffY / cameraZoom;
 	        
 	        
-	        lastMouseLocation = new Point(e.getPoint().x - (this.getWidth()/2), e.getPoint().y - (this.getHeight()/2));
+	        lastMouseLocationCamera = new Point(e.getPoint().x - (this.getWidth()/2), e.getPoint().y - (this.getHeight()/2));
 	        
 	        repaint();
 		}
 	}
 	
 	public void actionPerformed(ActionEvent e) {
-		if(e.getActionCommand() == "Open") {
+		if(e.getActionCommand() == "Play") {
+			Render render = new Render(frames);
+			render.setVisible(true);
+			render.setBounds(0, 0, 1500, 700);
+			render.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	        render.setTitle("Play");
 			
 		}
 		if(e.getActionCommand() == "New Frame") {
@@ -181,17 +139,17 @@ public class Draw extends JPanel implements MouseListener, MouseMotionListener, 
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		if(e.getPoint().x > 100 && e.getPoint().x < 1800 && e.getPoint().y > 50 && e.getPoint().y < 950) {
 		
-			lastMouseLocation = new Point((int) ((e.getPoint().x - (this.getWidth()/2))/cameraZoom) , (int) ((e.getPoint().y - (this.getHeight()/2)) / cameraZoom));
 		
-		}
+			lastMouseLocation = new Point((int) ((e.getPoint().x - (this.getWidth()/2))/cameraZoom - cameraX) , (int) ((e.getPoint().y - (this.getHeight()/2)) / cameraZoom - cameraY));
+			lastMouseLocationCamera = new Point(e.getPoint().x - (this.getWidth()/2), e.getPoint().y - (this.getHeight()/2));
+		
 		
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		if(e.getPoint().x > 100 && e.getPoint().x < 1800 && e.getPoint().y > 50 && e.getPoint().y < 950 && mode == 0) {
+		if(mode == 0) {
 			frames.get(currentFrame).add(null);
 		}
 	}
@@ -201,7 +159,7 @@ public class Draw extends JPanel implements MouseListener, MouseMotionListener, 
 		
 		 Graphics2D g2d = (Graphics2D)g;
 		 g.setColor(Color.black);
-			g.drawRect(100, 50, 1700, 900);
+			g.drawRect(0, 0, this.getWidth(), this.getHeight());
 	        ///Fill the background
 	        //g2d.setColor(Color.CYAN);
 	        //g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
@@ -224,7 +182,6 @@ public class Draw extends JPanel implements MouseListener, MouseMotionListener, 
 		//g.fillRect(200, 150, 1500, 700);
 		g.fillRect(-750, -350, 1500, 700);
 		
-            
 		//System.out.println(frames.get(currentFrame).size());
 		for( int i = 0; i < frames.get(currentFrame).size() - 1; ++i ) {
 	          ColorVector p1 = (ColorVector) frames.get(currentFrame).get( i );
