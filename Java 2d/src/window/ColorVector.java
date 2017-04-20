@@ -15,6 +15,7 @@ import java.awt.Point;
 public class ColorVector {
     public Point point;
     public Color color;
+    public float width;
     
     public ColorVector(Point point, Color color) {
         this.point = point;

@@ -1,11 +1,14 @@
 package window;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.RenderingHints;
+import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -13,6 +16,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.event.TextEvent;
+import java.awt.event.TextListener;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,8 +37,11 @@ public class Draw extends JPanel implements MouseListener, MouseMotionListener, 
 	float cameraX = 0;
     float cameraY = 0;
     int mode = 0;
-    
-    float cameraZoom = 1;
+    int canvasWidth = 1920;
+    int canvasHeight = 1080;
+    public float lineWidth = 1f;
+    public int frameRate = 24;
+    float cameraZoom = 0.7f;
 	
 	public Draw() {
 		//this.setLayout(new BorderLayout());
@@ -51,7 +59,10 @@ public class Draw extends JPanel implements MouseListener, MouseMotionListener, 
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		if(mode == 0) {
-			frames.get(currentFrame).add(new ColorVector(lastMouseLocation, color));
+			
+			ColorVector temp = new ColorVector(lastMouseLocation, color);
+			temp.width = lineWidth;
+			frames.get(currentFrame).add(temp);
 			lastMouseLocation = new Point((int) ((e.getPoint().x - (this.getWidth()/2))/cameraZoom - cameraX), (int) ((e.getPoint().y - (this.getHeight()/2)) / cameraZoom - cameraY));
 			repaint();
 		}
@@ -75,10 +86,10 @@ public class Draw extends JPanel implements MouseListener, MouseMotionListener, 
 		if(e.getActionCommand() == "Play") {
 			Render render = new Render(frames);
 			render.setVisible(true);
-			render.setBounds(0, 0, 1500, 700);
-			render.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			render.setBounds(0, 0, canvasWidth, canvasHeight);
+			//render.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	        render.setTitle("Play");
-			
+			render.frameRate = frameRate;
 		}
 		if(e.getActionCommand() == "New Frame") {
 			frames.add(currentFrame + 1, new ArrayList<ColorVector>());
@@ -158,8 +169,13 @@ public class Draw extends JPanel implements MouseListener, MouseMotionListener, 
 		super.paint(g);
 		
 		 Graphics2D g2d = (Graphics2D)g;
-		 g.setColor(Color.black);
-			g.drawRect(0, 0, this.getWidth(), this.getHeight());
+		 
+		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		//g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
+		g.setColor(Color.black);
+		g.drawRect(0, 0, this.getWidth()-1, this.getHeight()-1);
+		 
 	        ///Fill the background
 	        //g2d.setColor(Color.CYAN);
 	        //g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
@@ -180,7 +196,9 @@ public class Draw extends JPanel implements MouseListener, MouseMotionListener, 
 		
 		g.setColor(Color.white);
 		//g.fillRect(200, 150, 1500, 700);
-		g.fillRect(-750, -350, 1500, 700);
+		g.fillRect(-canvasWidth/2, -canvasHeight/2, canvasWidth, canvasHeight);
+		
+		 
 		
 		//System.out.println(frames.get(currentFrame).size());
 		for( int i = 0; i < frames.get(currentFrame).size() - 1; ++i ) {
@@ -194,7 +212,9 @@ public class Draw extends JPanel implements MouseListener, MouseMotionListener, 
 	          if( !(p1 == null || p2 == null)) {
 	        	 //g.setColor( p2.getColor());
                         g.setColor(p1.color);
-                        
+                        g2d.setStroke(new BasicStroke(p1.width,              
+                                BasicStroke.CAP_ROUND,   
+                                BasicStroke.JOIN_MITER));
                         g.drawLine( p1.point.x, p1.point.y, p2.point.x, p2.point.y );  
                          
 	             
@@ -215,11 +235,7 @@ public class Draw extends JPanel implements MouseListener, MouseMotionListener, 
         {
             cameraZoom /= 1.1;
         }
-        
-       
-        
         repaint();
 		
 	}
-
 }
