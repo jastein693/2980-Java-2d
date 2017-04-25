@@ -14,9 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.Timer;
 
-public class Render extends JFrame implements Runnable, ActionListener{
+public class Render extends JPanel implements Runnable, ActionListener{
 	private static List<List<ColorVector>> frames = new ArrayList<List<ColorVector>>();
 	private int currentFrame = 0;
 	//private long elapsedTime;

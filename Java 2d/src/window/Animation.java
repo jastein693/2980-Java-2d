@@ -67,6 +67,9 @@ public class Animation extends JFrame implements Runnable, ChangeListener{
 		JButton camera = new JButton ("Camera");
 		camera.addActionListener(draw);
 		
+		JButton onionSkin = new JButton("Onion Skin");
+		onionSkin.addActionListener(draw);
+		
 		lineWidth = new SpinnerNumberModel(1,0.1,99999,0.1);
 		lineWidth.addChangeListener(this);
         Label line = new Label("Line Width:");
@@ -93,6 +96,7 @@ public class Animation extends JFrame implements Runnable, ChangeListener{
         sidemenu.add(black);
         sidemenu.add(paint);
         sidemenu.add(camera);
+        sidemenu.add(onionSkin);
         
         bottommenu.add(line);
         bottommenu.add(spinner1);

@@ -42,6 +42,7 @@ public class Draw extends JPanel implements MouseListener, MouseMotionListener, 
     public float lineWidth = 1f;
     public int frameRate = 24;
     float cameraZoom = 0.7f;
+    private boolean onionSkin = false;
 	
 	public Draw() {
 		//this.setLayout(new BorderLayout());
@@ -84,11 +85,14 @@ public class Draw extends JPanel implements MouseListener, MouseMotionListener, 
 	
 	public void actionPerformed(ActionEvent e) {
 		if(e.getActionCommand() == "Play") {
+			JFrame rFrame = new JFrame();
 			Render render = new Render(frames);
-			render.setVisible(true);
-			render.setBounds(0, 0, canvasWidth, canvasHeight);
+			render.setDoubleBuffered(true);
+			rFrame.add(render);
+			rFrame.setVisible(true);
+			rFrame.setBounds(0, 0, canvasWidth, canvasHeight);
 			//render.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	        render.setTitle("Play");
+			rFrame.setTitle("Play");
 			render.frameRate = frameRate;
 		}
 		if(e.getActionCommand() == "New Frame") {
@@ -121,6 +125,10 @@ public class Draw extends JPanel implements MouseListener, MouseMotionListener, 
         }
         if(e.getActionCommand() == "Camera") {
         	mode = 1;
+        }
+        if(e.getActionCommand() == "Onion Skin") {
+        	onionSkin = !onionSkin;
+        	repaint();
         }
 	}
 
@@ -220,6 +228,28 @@ public class Draw extends JPanel implements MouseListener, MouseMotionListener, 
 	             
 	          }
 		 }
+
+		if(currentFrame != 0 && onionSkin) {
+			for( int i = 0; i < frames.get(currentFrame-1).size() - 1; ++i ) {
+		          ColorVector p1 = (ColorVector) frames.get(currentFrame-1).get( i );
+		          ColorVector p2 = (ColorVector) frames.get(currentFrame-1).get( i + 1 );
+		          
+		          // Adding a null into the list is used
+		          // for breaking up the lines when
+		          // there are two or more lines
+		          // that are not connected
+		          if( !(p1 == null || p2 == null)) {
+		        	 //g.setColor( p2.getColor());
+		        	  	g2d.setColor( new Color(p1.color.getRed()/255, p1.color.getGreen()/255, p1.color.getBlue()/255, .3f));
+	                      g2d.setStroke(new BasicStroke(p1.width,              
+	                              BasicStroke.CAP_ROUND,   
+	                              BasicStroke.JOIN_MITER));
+	                      g.drawLine( p1.point.x, p1.point.y, p2.point.x, p2.point.y );  
+		          }
+			 }
+		}
+		
+		
 	}
 
 	@Override
